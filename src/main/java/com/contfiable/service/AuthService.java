@@ -1,6 +1,6 @@
-package com.ionic.service;
+package com.contfiable.service;
 
-import com.ionic.dto.AuthResponse;
+import com.contfiable.dto.user.AuthResponse;
 import org.springframework.stereotype.Service;
 
 @Service

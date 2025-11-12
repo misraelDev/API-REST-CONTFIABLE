@@ -1,8 +1,8 @@
-package com.ionic.security;
+package com.contfiable.security;
 
-import com.ionic.dto.AuthResponse;
-import com.ionic.service.AuthService;
-import com.ionic.service.TokenCacheService;
+import com.contfiable.dto.AuthResponse;
+import com.contfiable.service.AuthService;
+import com.contfiable.service.TokenCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

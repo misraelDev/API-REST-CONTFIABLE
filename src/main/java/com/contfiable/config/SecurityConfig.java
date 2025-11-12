@@ -1,8 +1,8 @@
-package com.ionic.config;
+package com.contfiable.config;
 
 
-import com.ionic.security.JwtAuthenticationFilter;
-import com.ionic.security.UserDetailsServiceImpl;
+import com.contfiable.security.JwtAuthenticationFilter;
+import com.contfiable.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

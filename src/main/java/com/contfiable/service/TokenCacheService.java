@@ -1,6 +1,6 @@
-package com.ionic.service;
+package com.contfiable.service;
 
-import com.ionic.dto.AuthResponse;
+import com.contfiable.dto.user.AuthResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

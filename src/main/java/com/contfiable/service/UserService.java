@@ -1,8 +1,8 @@
-package com.ionic.service;
+package com.contfiable.service;
 
-import com.ionic.Model.User;
-import com.ionic.dto.*;
-import com.ionic.repository.UserRepository;
+import com.contfiable.dto.user.*;
+import com.contfiable.model.User;
+import com.contfiable.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;

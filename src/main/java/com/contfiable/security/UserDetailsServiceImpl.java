@@ -1,7 +1,7 @@
-package com.ionic.security;
+package com.contfiable.security;
 
-import com.ionic.Model.User;
-import com.ionic.repository.UserRepository;
+import com.contfiable.model.User;
+import com.contfiable.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

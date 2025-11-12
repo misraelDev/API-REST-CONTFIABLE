@@ -1,4 +1,4 @@
-package com.ionic.exception;
+package com.contfiable.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

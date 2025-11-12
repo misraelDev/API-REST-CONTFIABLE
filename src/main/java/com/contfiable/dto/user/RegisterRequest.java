@@ -1,4 +1,4 @@
-package com.ionic.dto;
+package com.contfiable.dto;
 
 import jakarta.validation.constraints.*;
 
