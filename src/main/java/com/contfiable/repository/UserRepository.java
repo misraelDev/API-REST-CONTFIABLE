@@ -1,7 +1,8 @@
-package com.ionic.repository;
+package com.contfiable.repository;
 
-import com.ionic.Model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.contfiable.model.User;
 
 import java.util.Optional;
 

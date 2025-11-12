@@ -1,4 +1,4 @@
-package com.ionic.Model;
+package com.contfiable.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

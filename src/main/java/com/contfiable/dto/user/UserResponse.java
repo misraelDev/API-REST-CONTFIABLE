@@ -1,6 +1,6 @@
-package com.ionic.dto;
+package com.contfiable.dto.user;
 
-import com.ionic.Model.User;
+import com.contfiable.model.User;
 
 public class UserResponse {
 

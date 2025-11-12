@@ -1,4 +1,4 @@
-package com.ionic.dto;
+package com.contfiable.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,7 +1,7 @@
-package com.ionic.controller;
+package com.contfiable.controller;
 
-import com.ionic.dto.*;
-import com.ionic.service.UserService;
+import com.contfiable.dto.user.*;
+import com.contfiable.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
