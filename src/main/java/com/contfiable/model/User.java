@@ -55,7 +55,7 @@ public class User {
     @Pattern(regexp = "^\\+\\d{1,4}$", message = "Country code must have the format +XX")
     private String codePhone;
 
-    @Column(name = "phone", length = 10)
+    @Column(name = "phone", length = 10, unique = true)
     @NotBlank(message = "Phone is required")
     @Pattern(regexp = "^\\d{10}$", message = "Phone must have exactly 10 digits")
     private String phone;

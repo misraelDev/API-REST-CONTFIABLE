@@ -72,17 +72,4 @@ public class UserController {
 		userService.deleteUser(userId);
 		return ResponseEntity.noContent().build();
 	}
-
-	@PostMapping("/test-validation")
-	public ResponseEntity<Map<String, Object>> testValidation(@Valid @RequestBody RegisterRequest request) {
-		Map<String, Object> response = new HashMap<>();
-		response.put("message", "Validation passed!");
-		response.put("data", request);
-		return ResponseEntity.ok(response);
-	}
-
-	@GetMapping("/test-error")
-	public ResponseEntity<String> testError() {
-		throw new RuntimeException("Test error for debugging");
-	}
 }

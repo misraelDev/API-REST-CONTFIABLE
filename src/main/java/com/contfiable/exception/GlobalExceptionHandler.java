@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,137 +17,143 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         logger.info("Validation error occurred: {}", ex.getMessage());
-        
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
-        
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
+
+        List<ApiError> errorItems = new java.util.ArrayList<>();
+        List<String> details = new java.util.ArrayList<>();
+
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = error instanceof FieldError fieldError ? fieldError.getField() : error.getObjectName();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
             logger.info("Validation error - Field: {}, Message: {}", fieldName, errorMessage);
+            errorItems.add(new ApiError(errorMessage, fieldName));
+            details.add("%s: %s".formatted(fieldName, errorMessage));
         });
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Validation Failed");
-        response.put("message", "Los datos proporcionados no son válidos");
-        response.put("details", errors);
-        
-        return ResponseEntity.badRequest().body(response);
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Los datos proporcionados no son válidos",
+                errorItems,
+                details
+        );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
         logger.info("Resource not found: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return buildErrorResponse(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                List.of(new ApiError(ex.getMessage()))
+        );
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         logger.info("Bad request: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Bad Request");
-        response.put("message", ex.getMessage());
-
-        return ResponseEntity.badRequest().body(response);
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                List.of(new ApiError(ex.getMessage()))
+        );
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
         logger.info("Business exception: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
-        response.put("error", "Business Rule Violation");
-        response.put("message", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+        return buildErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.getMessage(),
+                List.of(new ApiError(ex.getMessage()))
+        );
     }
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
         logger.info("Data integrity violation: {}", ex.getMessage());
-        
-        Map<String, Object> response = new HashMap<>();
-        
+
         String message = "Error de integridad de datos";
-        if (ex.getMessage().contains("duplicate key") || ex.getMessage().contains("Email already exists")) {
+        if (ex.getMessage() != null && (ex.getMessage().contains("duplicate key") || ex.getMessage().contains("Email already exists"))) {
             message = "El email ya está registrado en el sistema";
         }
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.CONFLICT.value());
-        response.put("error", "Conflict");
-        response.put("message", message);
-        
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+        return buildErrorResponse(
+                HttpStatus.CONFLICT,
+                message,
+                List.of(new ApiError(message))
+        );
     }
 
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleConstraintViolation(jakarta.validation.ConstraintViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(jakarta.validation.ConstraintViolationException ex) {
         logger.info("Constraint violation: {}", ex.getMessage());
 
-        Map<String, Object> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation ->
-                errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+        List<ApiError> errorItems = new java.util.ArrayList<>();
+        List<String> details = new java.util.ArrayList<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            String field = violation.getPropertyPath().toString();
+            String message = violation.getMessage();
+            logger.info("Constraint violation - Field: {}, Message: {}", field, message);
+            errorItems.add(new ApiError(message, field));
+            details.add("%s: %s".formatted(field, message));
+        });
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Los datos proporcionados no son válidos",
+                errorItems,
+                details
         );
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Constraint Violation");
-        response.put("message", "Los datos proporcionados no son válidos");
-        response.put("details", errors);
-
-        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
         logger.error("Runtime exception occurred: ", ex);
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Runtime Error");
-        response.put("message", ex.getMessage());
-        response.put("exceptionType", ex.getClass().getSimpleName());
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        String message = ex.getMessage() != null ? ex.getMessage() : "Error de ejecución";
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                message,
+                List.of(new ApiError(message)),
+                ex.getClass().getSimpleName()
+        );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         logger.error("Unexpected error occurred: ", ex);
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage() != null ? ex.getMessage() : "Ha ocurrido un error interno del servidor");
-        response.put("exceptionType", ex.getClass().getSimpleName());
-        
-        // Para debugging - solo en desarrollo
-        if (ex.getCause() != null) {
-            response.put("cause", ex.getCause().getMessage());
+        String message = ex.getMessage() != null ? ex.getMessage() : "Ha ocurrido un error interno del servidor";
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                message,
+                List.of(new ApiError(message)),
+                ex.getClass().getSimpleName()
+        );
+    }
+
+    private ResponseEntity<ErrorResponse> buildErrorResponse(
+            HttpStatus status,
+            String message,
+            List<ApiError> errors
+    ) {
+        return buildErrorResponse(status, message, errors, null);
+    }
+
+    private ResponseEntity<ErrorResponse> buildErrorResponse(
+            HttpStatus status,
+            String message,
+            List<ApiError> errors,
+            Object details
+    ) {
+        ErrorResponse response = new ErrorResponse();
+        response.setStatus(status.value());
+        response.setMessage(message);
+        response.setError(status.getReasonPhrase());
+        response.setErrors(errors != null && !errors.isEmpty() ? errors : List.of(new ApiError(message)));
+        if (details != null) {
+            response.setDetails(details);
         }
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(status).body(response);
     }
 }
