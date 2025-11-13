@@ -27,20 +27,33 @@ public class InvoiceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Obtiene una factura por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo devuelve facturas del usuario autenticado.
+     */
     @GetMapping("/{invoiceId}")
     public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable Long invoiceId) {
         InvoiceResponse response = invoiceService.getInvoice(invoiceId);
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Obtiene todas las facturas del usuario autenticado.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo devuelve facturas del usuario autenticado.
+     */
     @GetMapping
-    public ResponseEntity<List<InvoiceResponse>> getInvoices(
-            @RequestParam(name = "customerId", required = false) Long customerId
-    ) {
-        List<InvoiceResponse> responses = invoiceService.getInvoices(customerId);
+    public ResponseEntity<List<InvoiceResponse>> getInvoices() {
+        List<InvoiceResponse> responses = invoiceService.getInvoices();
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Actualiza una factura por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo permite actualizar facturas del usuario autenticado.
+     */
     @PutMapping("/{invoiceId}")
     public ResponseEntity<InvoiceResponse> updateInvoice(
             @PathVariable Long invoiceId,
@@ -50,6 +63,11 @@ public class InvoiceController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Elimina una factura por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo permite eliminar facturas del usuario autenticado.
+     */
     @DeleteMapping("/{invoiceId}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long invoiceId) {
         invoiceService.deleteInvoice(invoiceId);

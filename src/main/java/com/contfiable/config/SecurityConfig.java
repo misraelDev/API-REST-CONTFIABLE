@@ -73,14 +73,10 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req
-                        // Rutas públicas específicas (accesibles sin autenticación)
-                        .requestMatchers("/api/v1/users/**").permitAll()
-                        .requestMatchers("/api/v1/invoices/**").permitAll()
-                        .requestMatchers("/api/v1/articles/**").permitAll()
-
-
+                        // Rutas públicas (registro y login)
+                        .requestMatchers("/api/v1/users/register", "/api/v1/users/login", "/api/v1/users/refresh").permitAll()
                         
-                        // Cualquier otra ruta requiere autenticación
+                        // Todas las demás rutas requieren autenticación
                         .anyRequest().authenticated())
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

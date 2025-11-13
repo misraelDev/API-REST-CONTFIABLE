@@ -27,6 +27,11 @@ public class Invoice {
         other
     }
 
+    public enum Type {
+        income,
+        expense
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -39,9 +44,18 @@ public class Invoice {
     private OffsetDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
-    @NotNull(message = "El cliente es requerido")
-    private User customer;
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "El usuario es requerido")
+    private User user;
+
+    @Column(name = "customer_name", length = 200)
+    @NotBlank(message = "El nombre del cliente es requerido")
+    @Size(max = 200, message = "El nombre del cliente no puede exceder 200 caracteres")
+    private String customerName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private Type type = Type.income;
 
     @Column(name = "invoice_number", unique = true)
     private Long invoiceNumber;
@@ -122,12 +136,28 @@ public class Invoice {
         this.updatedAt = updatedAt;
     }
 
-    public User getCustomer() {
-        return customer;
+    public User getUser() {
+        return user;
     }
 
-    public void setCustomer(User customer) {
-        this.customer = customer;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Long getInvoiceNumber() {
