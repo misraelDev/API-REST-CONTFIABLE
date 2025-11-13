@@ -38,8 +38,12 @@ public class InvoiceService {
     public InvoiceResponse createInvoice(InvoiceCreateRequest request) {
         User currentUser = securityService.getCurrentUser();
 
+        // Generar número de factura automáticamente
+        Long nextInvoiceNumber = invoiceRepository.findMaxInvoiceNumber() + 1;
+
         Invoice invoice = new Invoice();
         invoice.setUser(currentUser);
+        invoice.setInvoiceNumber(nextInvoiceNumber);
         invoice.setCustomerName(request.getCustomerName());
         invoice.setType(Optional.ofNullable(request.getType()).orElse(Invoice.Type.income));
         invoice.setStatus(Optional.ofNullable(request.getStatus()).orElse(Invoice.Status.draft));
