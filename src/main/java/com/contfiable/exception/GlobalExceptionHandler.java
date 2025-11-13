@@ -52,10 +52,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         logger.info("Bad request: {}", ex.getMessage());
+        
+        // Errores de autenticación deben devolver 401
+        String message = ex.getMessage();
+        if (message != null && (message.contains("correo electrónico no está registrado") 
+                || message.contains("contraseña es incorrecta")
+                || message.contains("credenciales"))) {
+            return buildErrorResponse(
+                    HttpStatus.UNAUTHORIZED,
+                    message,
+                    List.of(new ApiError(message))
+            );
+        }
+        
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                ex.getMessage(),
-                List.of(new ApiError(ex.getMessage()))
+                message,
+                List.of(new ApiError(message))
         );
     }
 

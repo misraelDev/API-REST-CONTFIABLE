@@ -1,6 +1,7 @@
 package com.contfiable.service.user;
 
 import com.contfiable.dto.user.*;
+import com.contfiable.exception.BadRequestException;
 import com.contfiable.exception.ResourceNotFoundException;
 import com.contfiable.model.User;
 import com.contfiable.repository.UserRepository;
@@ -70,11 +71,11 @@ public class UserService {
 	public AuthResponse login(LoginRequest request) {
 		Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
 		if (userOpt.isEmpty()) {
-			return null;
+			throw new BadRequestException("El correo electrónico no está registrado");
 		}
 		User user = userOpt.get();
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-			return null;
+			throw new BadRequestException("La contraseña es incorrecta");
 		}
 		UserDetails userDetails = new org.springframework.security.core.userdetails.User(
 				user.getEmail(),
