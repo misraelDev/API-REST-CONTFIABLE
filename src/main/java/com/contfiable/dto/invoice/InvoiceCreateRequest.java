@@ -2,15 +2,17 @@ package com.contfiable.dto.invoice;
 
 import com.contfiable.model.Invoice;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
 
 public class InvoiceCreateRequest {
 
-    @NotNull(message = "El identificador del cliente es obligatorio")
-    private Long customerId;
+    @NotBlank(message = "El nombre del cliente es obligatorio")
+    @Size(max = 200, message = "El nombre del cliente no puede exceder 200 caracteres")
+    private String customerName;
+
+    private Invoice.Type type;
 
     private Invoice.Status status;
 
@@ -39,12 +41,20 @@ public class InvoiceCreateRequest {
     @Size(max = 500, message = "La URL del XML no puede exceder 500 caracteres")
     private String xmlUrl;
 
-    public Long getCustomerId() {
-        return customerId;
+    public String getCustomerName() {
+        return customerName;
     }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public Invoice.Type getType() {
+        return type;
+    }
+
+    public void setType(Invoice.Type type) {
+        this.type = type;
     }
 
     public Invoice.Status getStatus() {

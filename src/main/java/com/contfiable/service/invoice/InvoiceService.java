@@ -9,9 +9,10 @@ import com.contfiable.model.Invoice;
 import com.contfiable.model.User;
 import com.contfiable.repository.ArticleRepository;
 import com.contfiable.repository.InvoiceRepository;
-import com.contfiable.repository.UserRepository;
+import com.contfiable.security.SecurityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,28 +21,27 @@ import java.util.Optional;
 public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
-    private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
+    private final SecurityService securityService;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
-            UserRepository userRepository,
-            ArticleRepository articleRepository
+            ArticleRepository articleRepository,
+            SecurityService securityService
     ) {
         this.invoiceRepository = invoiceRepository;
-        this.userRepository = userRepository;
         this.articleRepository = articleRepository;
+        this.securityService = securityService;
     }
 
     @Transactional
     public InvoiceResponse createInvoice(InvoiceCreateRequest request) {
-        User customer = userRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "El cliente con id %d no existe".formatted(request.getCustomerId())
-                ));
+        User currentUser = securityService.getCurrentUser();
 
         Invoice invoice = new Invoice();
-        invoice.setCustomer(customer);
+        invoice.setUser(currentUser);
+        invoice.setCustomerName(request.getCustomerName());
+        invoice.setType(Optional.ofNullable(request.getType()).orElse(Invoice.Type.income));
         invoice.setStatus(Optional.ofNullable(request.getStatus()).orElse(Invoice.Status.draft));
         invoice.setCurrency(request.getCurrency());
         invoice.setPaymentMethod(request.getPaymentMethod());
@@ -59,28 +59,35 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public InvoiceResponse getInvoice(Long id) {
-        Invoice invoice = invoiceRepository.findById(id)
+        Long userId = securityService.getCurrentUserId();
+        Invoice invoice = invoiceRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la factura con id %d".formatted(id)));
         return mapToResponse(invoice);
     }
 
     @Transactional(readOnly = true)
-    public List<InvoiceResponse> getInvoices(Long customerId) {
-        List<Invoice> invoices = customerId != null
-                ? invoiceRepository.findByCustomerId(customerId)
-                : invoiceRepository.findAll();
+    public List<InvoiceResponse> getInvoices() {
+        Long userId = securityService.getCurrentUserId();
+        List<Invoice> invoices = invoiceRepository.findByUserId(userId);
         return invoices.stream().map(this::mapToResponse).toList();
     }
 
     @Transactional
     public InvoiceResponse updateInvoice(Long id, InvoiceUpdateRequest request) {
-        Invoice invoice = invoiceRepository.findById(id)
+        Long userId = securityService.getCurrentUserId();
+        Invoice invoice = invoiceRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la factura con id %d".formatted(id)));
 
+        if (StringUtils.hasText(request.getCustomerName())) {
+            invoice.setCustomerName(request.getCustomerName());
+        }
+        if (request.getType() != null) {
+            invoice.setType(request.getType());
+        }
         if (request.getStatus() != null) {
             invoice.setStatus(request.getStatus());
         }
-        if (request.getCurrency() != null) {
+        if (StringUtils.hasText(request.getCurrency())) {
             invoice.setCurrency(request.getCurrency());
         }
         if (request.getPaymentMethod() != null) {
@@ -114,7 +121,8 @@ public class InvoiceService {
 
     @Transactional
     public void deleteInvoice(Long id) {
-        Invoice invoice = invoiceRepository.findById(id)
+        Long userId = securityService.getCurrentUserId();
+        Invoice invoice = invoiceRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la factura con id %d".formatted(id)));
         invoiceRepository.delete(invoice);
     }

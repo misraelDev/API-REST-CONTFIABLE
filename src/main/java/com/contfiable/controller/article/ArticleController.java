@@ -27,6 +27,11 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Obtiene un artículo por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo devuelve artículos de facturas del usuario autenticado.
+     */
     @GetMapping("/{articleId}")
     public ResponseEntity<ArticleResponse> getArticle(@PathVariable Long articleId) {
         ArticleResponse response = articleService.getArticle(articleId);
@@ -41,6 +46,11 @@ public class ArticleController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Actualiza un artículo por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo permite actualizar artículos de facturas del usuario autenticado.
+     */
     @PutMapping("/{articleId}")
     public ResponseEntity<ArticleResponse> updateArticle(
             @PathVariable Long articleId,
@@ -50,6 +60,11 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Elimina un artículo por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo permite eliminar artículos de facturas del usuario autenticado.
+     */
     @DeleteMapping("/{articleId}")
     public ResponseEntity<Void> deleteArticle(@PathVariable Long articleId) {
         articleService.deleteArticle(articleId);

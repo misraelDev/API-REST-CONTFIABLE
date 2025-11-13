@@ -2,9 +2,9 @@ package com.contfiable.service.user;
 
 import com.contfiable.dto.user.*;
 import com.contfiable.exception.BadRequestException;
-import com.contfiable.exception.ResourceNotFoundException;
 import com.contfiable.model.User;
 import com.contfiable.repository.UserRepository;
+import com.contfiable.security.SecurityService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,11 +21,18 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final SecurityService securityService;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+	public UserService(
+			UserRepository userRepository,
+			PasswordEncoder passwordEncoder,
+			JwtService jwtService,
+			SecurityService securityService
+	) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
+		this.securityService = securityService;
 	}
 
 	public AuthResponse register(RegisterRequest request) {
@@ -135,15 +142,14 @@ public class UserService {
 		return UserDetailResponse.fromEntity(saved);
 	}
 
-	public UserDetailResponse getUser(Long id) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("No se encontró el usuario con id %d".formatted(id)));
+	public UserDetailResponse getCurrentUser() {
+		User user = securityService.getCurrentUser();
 		return UserDetailResponse.fromEntity(user);
 	}
 
-	public UserDetailResponse updateUser(Long id, UserUpdateRequest request) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("No se encontró el usuario con id %d".formatted(id)));
+
+	public UserDetailResponse updateCurrentUser(UserUpdateRequest request) {
+		User user = securityService.getCurrentUser();
 
 		if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
 			userRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
@@ -203,9 +209,10 @@ public class UserService {
 		return UserDetailResponse.fromEntity(saved);
 	}
 
-	public void deleteUser(Long id) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("No se encontró el usuario con id %d".formatted(id)));
+
+	public void deleteCurrentUser() {
+		User user = securityService.getCurrentUser();
 		userRepository.delete(user);
 	}
+
 }

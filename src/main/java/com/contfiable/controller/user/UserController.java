@@ -43,9 +43,14 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@GetMapping("/{userId}")
-	public ResponseEntity<UserDetailResponse> getUser(@PathVariable Long userId) {
-		return ResponseEntity.ok(userService.getUser(userId));
+	/**
+	 * Obtiene el perfil del usuario autenticado.
+	 * Requiere autenticación JWT en el header Authorization: Bearer {token}
+	 * No requiere ID en la URL, se obtiene del token.
+	 */
+	@GetMapping("/me")
+	public ResponseEntity<UserDetailResponse> getCurrentUser() {
+		return ResponseEntity.ok(userService.getCurrentUser());
 	}
 
 	@GetMapping
@@ -53,18 +58,27 @@ public class UserController {
 		return ResponseEntity.ok(userService.getAllUsers());
 	}
 
-	@PutMapping("/{userId}")
-	public ResponseEntity<UserDetailResponse> updateUser(
-			@PathVariable Long userId,
+	/**
+	 * Actualiza el perfil del usuario autenticado.
+	 * Requiere autenticación JWT en el header Authorization: Bearer {token}
+	 * No requiere ID en la URL, se obtiene del token.
+	 */
+	@PutMapping("/me")
+	public ResponseEntity<UserDetailResponse> updateCurrentUser(
 			@Valid @RequestBody UserUpdateRequest request
 	) {
-		UserDetailResponse response = userService.updateUser(userId, request);
+		UserDetailResponse response = userService.updateCurrentUser(request);
 		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/{userId}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-		userService.deleteUser(userId);
+	/**
+	 * Elimina el perfil del usuario autenticado.
+	 * Requiere autenticación JWT en el header Authorization: Bearer {token}
+	 * No requiere ID en la URL, se obtiene del token.
+	 */
+	@DeleteMapping("/me")
+	public ResponseEntity<Void> deleteCurrentUser() {
+		userService.deleteCurrentUser();
 		return ResponseEntity.noContent().build();
 	}
 }

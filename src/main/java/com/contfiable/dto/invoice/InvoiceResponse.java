@@ -11,7 +11,8 @@ public class InvoiceResponse {
 
     private Long id;
     private Long invoiceNumber;
-    private Long customerId;
+    private String customerName;
+    private Invoice.Type type;
     private Invoice.Status status;
     private Invoice.PaymentMethod paymentMethod;
     private BigDecimal subtotal;
@@ -33,7 +34,8 @@ public class InvoiceResponse {
         InvoiceResponse response = new InvoiceResponse();
         response.id = invoice.getId();
         response.invoiceNumber = invoice.getInvoiceNumber();
-        response.customerId = invoice.getCustomer() != null ? invoice.getCustomer().getId() : null;
+        response.customerName = invoice.getCustomerName();
+        response.type = invoice.getType();
         response.status = invoice.getStatus();
         response.paymentMethod = invoice.getPaymentMethod();
         response.subtotal = invoice.getSubtotal();
@@ -61,8 +63,12 @@ public class InvoiceResponse {
         return invoiceNumber;
     }
 
-    public Long getCustomerId() {
-        return customerId;
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public Invoice.Type getType() {
+        return type;
     }
 
     public Invoice.Status getStatus() {

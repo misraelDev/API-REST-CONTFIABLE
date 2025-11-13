@@ -7,6 +7,10 @@ import java.time.OffsetDateTime;
 
 public class InvoiceUpdateRequest {
 
+    private String customerName;
+
+    private Invoice.Type type;
+
     private Invoice.Status status;
 
     @Size(min = 3, max = 3, message = "La moneda debe cumplir con el formato ISO 4217")
@@ -32,6 +36,22 @@ public class InvoiceUpdateRequest {
 
     @Size(max = 500, message = "La URL del XML no puede exceder 500 caracteres")
     private String xmlUrl;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public Invoice.Type getType() {
+        return type;
+    }
+
+    public void setType(Invoice.Type type) {
+        this.type = type;
+    }
 
     public Invoice.Status getStatus() {
         return status;
