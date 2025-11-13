@@ -58,23 +58,26 @@ public class InvoiceService {
         invoice.setPdfUrl(request.getPdfUrl());
         invoice.setXmlUrl(request.getXmlUrl());
 
-        // Guardar la factura primero para obtener el ID
-        Invoice savedInvoice = invoiceRepository.save(invoice);
-
-        // Crear los artículos asociados a la factura
+        // Crear los artículos y agregarlos a la factura antes de guardar
         if (request.getArticles() != null && !request.getArticles().isEmpty()) {
             for (InvoiceCreateRequest.ArticleItem articleItem : request.getArticles()) {
                 Article article = new Article();
-                article.setInvoice(savedInvoice);
                 article.setName(articleItem.getName());
                 article.setDescription(articleItem.getDescription());
                 article.setQuantity(articleItem.getQuantity());
                 article.setPrice(articleItem.getPrice());
                 article.setTax(articleItem.getTax() != null ? articleItem.getTax() : java.math.BigDecimal.ZERO);
                 article.setImageUrl(articleItem.getImageUrl());
-                articleRepository.save(article);
+                // Usar addArticle para establecer la relación bidireccional
+                invoice.addArticle(article);
             }
         }
+
+        // Guardar la factura (los artículos se guardarán por cascade)
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        
+        // Forzar el flush para asegurar que los artículos se guarden
+        invoiceRepository.flush();
 
         return mapToResponse(savedInvoice);
     }
