@@ -30,18 +30,26 @@ public class SecurityService {
         }
 
         Object principal = authentication.getPrincipal();
-        String userId;
+        String identifier;
         
         if (principal instanceof UserDetails userDetails) {
-            userId = userDetails.getUsername();
+            identifier = userDetails.getUsername();
         } else if (principal instanceof String) {
-            userId = (String) principal;
+            identifier = (String) principal;
         } else {
-            throw new BadRequestException("No se pudo obtener el ID del usuario autenticado");
+            throw new BadRequestException("No se pudo obtener el identificador del usuario autenticado");
         }
 
-        return userRepository.findById(Long.parseLong(userId))
-                .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado"));
+        // Intentar primero como ID numérico, si falla intentar como email
+        try {
+            Long userId = Long.parseLong(identifier);
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado"));
+        } catch (NumberFormatException e) {
+            // Si no es un número, intentar buscar por email
+            return userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado"));
+        }
     }
 
     /**
