@@ -74,8 +74,13 @@ public class GlobalExceptionHandler {
         logger.info("Data integrity violation: {}", ex.getMessage());
 
         String message = "Error de integridad de datos";
-        if (ex.getMessage() != null && (ex.getMessage().contains("duplicate key") || ex.getMessage().contains("Email already exists"))) {
-            message = "El email ya está registrado en el sistema";
+        if (ex.getMessage() != null) {
+            String normalized = ex.getMessage().toLowerCase();
+            if (normalized.contains("email") || normalized.contains("correo")) {
+                message = "El email ya está registrado en el sistema";
+            } else if (normalized.contains("phone") || normalized.contains("teléfono")) {
+                message = "El teléfono ya está registrado en el sistema";
+            }
         }
 
         return buildErrorResponse(

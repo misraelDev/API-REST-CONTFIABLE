@@ -1,10 +1,10 @@
 package com.contfiable.service.user;
 
 import com.contfiable.dto.user.*;
-import com.contfiable.exception.BadRequestException;
 import com.contfiable.exception.ResourceNotFoundException;
 import com.contfiable.model.User;
 import com.contfiable.repository.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +29,10 @@ public class UserService {
 
 	public AuthResponse register(RegisterRequest request) {
 		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-			throw new org.springframework.dao.DataIntegrityViolationException("Email already exists");
+			throw new DataIntegrityViolationException("Email already exists");
+		}
+		if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+			throw new DataIntegrityViolationException("Phone already exists");
 		}
 
 		User user = new User();
@@ -105,7 +108,10 @@ public class UserService {
 
 	public UserDetailResponse createUser(UserCreateRequest request) {
 		userRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
-			throw new BadRequestException("El correo electrónico ya está registrado");
+			throw new DataIntegrityViolationException("Email already exists");
+		});
+		userRepository.findByPhone(request.getPhone()).ifPresent(existing -> {
+			throw new DataIntegrityViolationException("Phone already exists");
 		});
 
 		User user = new User();
@@ -141,7 +147,7 @@ public class UserService {
 		if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
 			userRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
 				if (!existing.getId().equals(user.getId())) {
-					throw new BadRequestException("El correo electrónico ya está registrado");
+					throw new DataIntegrityViolationException("Email already exists");
 				}
 			});
 			user.setEmail(request.getEmail());
@@ -159,7 +165,12 @@ public class UserService {
 		if (StringUtils.hasText(request.getCodePhone())) {
 			user.setCodePhone(request.getCodePhone());
 		}
-		if (StringUtils.hasText(request.getPhone())) {
+		if (StringUtils.hasText(request.getPhone()) && !request.getPhone().equals(user.getPhone())) {
+			userRepository.findByPhone(request.getPhone()).ifPresent(existing -> {
+				if (!existing.getId().equals(user.getId())) {
+					throw new DataIntegrityViolationException("Phone already exists");
+				}
+			});
 			user.setPhone(request.getPhone());
 		}
 		if (StringUtils.hasText(request.getPassword())) {
