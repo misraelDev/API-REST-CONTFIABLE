@@ -1,6 +1,5 @@
 package com.contfiable.config;
 
-
 import com.contfiable.security.JwtAuthenticationFilter;
 import com.contfiable.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -30,24 +30,16 @@ public class SecurityConfig implements WebMvcConfigurer {
     private UserDetailsServiceImpl userDetailsService;
 
     // ============================================
-    // CONFIGURACIÓN CORS CENTRALIZADA
+    // CONFIGURACIÓN CORS PARA WEB Y MÓVIL
     // ============================================
     
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns(
-                    "http://localhost:3000",
-                    "http://localhost:3001",
-                    "http://127.0.0.1:3000",
-					"http://localhost:8100",
-					"http://localhost:8101",
-					"http://127.0.0.1:8102",
-					"http://127.0.0.1:8103"
-                )
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
-                .allowCredentials(true)
+                .allowCredentials(false)
                 .maxAge(3600);
     }
 
@@ -55,21 +47,13 @@ public class SecurityConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Configuración específica para dominios del frontend
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://127.0.0.1:3000",
-				"http://localhost:8100",
-				"http://localhost:8101",
-				"http://127.0.0.1:8102",
-				"http://127.0.0.1:8103"
-        ));
+        // Permitir todas las origins (necesario para apps móviles)
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -78,7 +62,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     }
 
     // ============================================
-    // // CONFIGURACIÓN DE SEGURIDAD
+    // CONFIGURACIÓN DE SEGURIDAD
     // ============================================
 
     @Bean
@@ -91,7 +75,6 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(req -> req
                         // Rutas públicas específicas (accesibles sin autenticación)
                         .requestMatchers("/api/v1/users/**").permitAll()
-        
                         
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())

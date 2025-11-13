@@ -10,6 +10,7 @@ public class UserResponse {
 	private String secondLastName;
 	private String email;
 	private String phone;
+	private String codePhone;
 	private String role;
 
 	public static UserResponse from(User user) {
@@ -20,6 +21,7 @@ public class UserResponse {
 		r.secondLastName = user.getSecondLastName();
 		r.email = user.getEmail();
 		r.phone = user.getPhone();
+		r.codePhone = user.getCodePhone();
 		r.role = user.getRole() != null ? user.getRole().name() : null;
 		return r;
 	}
@@ -30,6 +32,7 @@ public class UserResponse {
 	public String getSecondLastName() { return secondLastName; }
 	public String getEmail() { return email; }
 	public String getPhone() { return phone; }
+	public String getCodePhone() { return codePhone; }
 	public String getRole() { return role; }
 }
 
