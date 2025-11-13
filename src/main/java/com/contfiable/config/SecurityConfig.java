@@ -75,6 +75,10 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(req -> req
                         // Rutas públicas específicas (accesibles sin autenticación)
                         .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers("/api/v1/invoices/**").permitAll()
+                        .requestMatchers("/api/v1/articles/**").permitAll()
+
+
                         
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
