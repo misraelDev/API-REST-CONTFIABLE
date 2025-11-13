@@ -41,6 +41,45 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+        logger.info("Resource not found: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("error", "Not Found");
+        response.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
+        logger.info("Bad request: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Bad Request");
+        response.put("message", ex.getMessage());
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
+        logger.info("Business exception: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        response.put("error", "Business Rule Violation");
+        response.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
+
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
         logger.info("Data integrity violation: {}", ex.getMessage());
@@ -58,6 +97,25 @@ public class GlobalExceptionHandler {
         response.put("message", message);
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(jakarta.validation.ConstraintViolationException ex) {
+        logger.info("Constraint violation: {}", ex.getMessage());
+
+        Map<String, Object> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation ->
+                errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Constraint Violation");
+        response.put("message", "Los datos proporcionados no son válidos");
+        response.put("details", errors);
+
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(RuntimeException.class)

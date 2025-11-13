@@ -1,6 +1,7 @@
-package com.contfiable.service;
+package com.contfiable.service.user;
 
 import com.contfiable.dto.user.AuthResponse;
+
 import org.springframework.stereotype.Service;
 
 @Service

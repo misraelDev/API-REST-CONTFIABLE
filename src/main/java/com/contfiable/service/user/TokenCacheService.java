@@ -1,4 +1,4 @@
-package com.contfiable.service;
+package com.contfiable.service.user;
 
 import com.contfiable.dto.user.AuthResponse;
 import org.slf4j.Logger;

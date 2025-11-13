@@ -1,8 +1,9 @@
 package com.contfiable.security;
 
-import com.contfiable.dto.AuthResponse;
-import com.contfiable.service.AuthService;
-import com.contfiable.service.TokenCacheService;
+import com.contfiable.dto.user.AuthResponse;
+import com.contfiable.service.user.AuthService;
+import com.contfiable.service.user.TokenCacheService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

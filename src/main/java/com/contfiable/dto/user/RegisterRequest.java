@@ -1,4 +1,4 @@
-package com.contfiable.dto;
+package com.contfiable.dto.user;
 
 import jakarta.validation.constraints.*;
 
@@ -22,6 +22,9 @@ public class RegisterRequest {
 	
 	@Size(max = 20, message = "El teléfono no puede exceder 20 caracteres")
 	private String phone;
+
+	@Size(max = 6, message = "El código de país no puede exceder 6 caracteres")
+	private String codePhone;
 	
 	@NotBlank(message = "La contraseña es obligatoria")
 	@Size(min = 6, max = 100, message = "La contraseña debe tener entre 6 y 100 caracteres")
@@ -65,6 +68,14 @@ public class RegisterRequest {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getCodePhone() {
+		return codePhone;
+	}
+
+	public void setCodePhone(String codePhone) {
+		this.codePhone = codePhone;
 	}
 
 	public String getPassword() {

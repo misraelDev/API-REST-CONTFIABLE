@@ -1,8 +1,9 @@
-package com.contfiable.controller;
+package com.contfiable.controller.user;
 
 import com.contfiable.dto.user.*;
-import com.contfiable.service.UserService;
+import com.contfiable.service.user.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,14 +24,14 @@ public class UserController {
 	@PostMapping("/register")
 	public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
 		AuthResponse response = userService.register(request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
 		AuthResponse response = userService.login(request);
 		if (response == null) {
-			return ResponseEntity.status(401).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		return ResponseEntity.ok(response);
 	}
@@ -41,9 +42,35 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PostMapping
+	public ResponseEntity<UserDetailResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
+		UserDetailResponse response = userService.createUser(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@GetMapping("/{userId}")
+	public ResponseEntity<UserDetailResponse> getUser(@PathVariable Long userId) {
+		return ResponseEntity.ok(userService.getUser(userId));
+	}
+
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> getAllUsers() {
 		return ResponseEntity.ok(userService.getAllUsers());
+	}
+
+	@PutMapping("/{userId}")
+	public ResponseEntity<UserDetailResponse> updateUser(
+			@PathVariable Long userId,
+			@Valid @RequestBody UserUpdateRequest request
+	) {
+		UserDetailResponse response = userService.updateUser(userId, request);
+		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/{userId}")
+	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+		userService.deleteUser(userId);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/test-validation")
@@ -59,5 +86,3 @@ public class UserController {
 		throw new RuntimeException("Test error for debugging");
 	}
 }
-
-

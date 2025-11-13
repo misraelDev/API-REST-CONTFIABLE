@@ -1,4 +1,4 @@
-package com.contfiable.service;
+package com.contfiable.service.user;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

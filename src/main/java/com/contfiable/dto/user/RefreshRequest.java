@@ -1,4 +1,4 @@
-package com.contfiable.dto;
+package com.contfiable.dto.user;
 
 public class RefreshRequest {
 

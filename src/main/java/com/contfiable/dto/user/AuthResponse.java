@@ -28,6 +28,9 @@ public class AuthResponse {
     @JsonProperty("phone")
     private String phone;	
 
+	@JsonProperty("code_phone")
+	private String codePhone; 
+
 	public AuthResponse() {}
 
 	public AuthResponse(String accessToken, String refreshToken, long expiresIn, String userId, String email, String role, String phone) {
@@ -102,6 +105,14 @@ public class AuthResponse {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getCodePhone() {
+		return codePhone;
+	}
+
+	public void setCodePhone(String codePhone) {
+		this.codePhone = codePhone;
 	}
 }
 
