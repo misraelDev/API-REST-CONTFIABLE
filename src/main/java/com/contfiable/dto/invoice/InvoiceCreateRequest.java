@@ -1,10 +1,14 @@
 package com.contfiable.dto.invoice;
 
 import com.contfiable.model.Invoice;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InvoiceCreateRequest {
 
@@ -40,6 +44,47 @@ public class InvoiceCreateRequest {
 
     @Size(max = 500, message = "La URL del XML no puede exceder 500 caracteres")
     private String xmlUrl;
+
+    @Valid
+    private List<ArticleItem> articles = new ArrayList<>();
+
+    // Clase interna para los artículos
+    public static class ArticleItem {
+        @NotBlank(message = "El nombre del artículo es obligatorio")
+        @Size(max = 200, message = "El nombre no puede exceder 200 caracteres")
+        private String name;
+
+        @Size(max = 2000, message = "La descripción no puede exceder 2000 caracteres")
+        private String description;
+
+        @jakarta.validation.constraints.NotNull(message = "La cantidad es obligatoria")
+        @jakarta.validation.constraints.DecimalMin(value = "0.01", message = "La cantidad debe ser mayor que 0")
+        private BigDecimal quantity;
+
+        @jakarta.validation.constraints.NotNull(message = "El precio es obligatorio")
+        @jakarta.validation.constraints.DecimalMin(value = "0.00", message = "El precio debe ser mayor o igual que 0")
+        private BigDecimal price;
+
+        @jakarta.validation.constraints.DecimalMin(value = "0.00", message = "El impuesto debe ser mayor o igual que 0")
+        private BigDecimal tax;
+
+        @Size(max = 500, message = "La URL de la imagen no puede exceder 500 caracteres")
+        private String imageUrl;
+
+        // Getters y Setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public BigDecimal getQuantity() { return quantity; }
+        public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
+        public BigDecimal getPrice() { return price; }
+        public void setPrice(BigDecimal price) { this.price = price; }
+        public BigDecimal getTax() { return tax; }
+        public void setTax(BigDecimal tax) { this.tax = tax; }
+        public String getImageUrl() { return imageUrl; }
+        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    }
 
     public String getCustomerName() {
         return customerName;
@@ -135,6 +180,14 @@ public class InvoiceCreateRequest {
 
     public void setXmlUrl(String xmlUrl) {
         this.xmlUrl = xmlUrl;
+    }
+
+    public List<ArticleItem> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(List<ArticleItem> articles) {
+        this.articles = articles != null ? articles : new ArrayList<>();
     }
 }
 
