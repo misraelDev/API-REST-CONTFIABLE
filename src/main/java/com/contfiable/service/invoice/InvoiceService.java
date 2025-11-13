@@ -5,6 +5,7 @@ import com.contfiable.dto.invoice.InvoiceCreateRequest;
 import com.contfiable.dto.invoice.InvoiceResponse;
 import com.contfiable.dto.invoice.InvoiceUpdateRequest;
 import com.contfiable.exception.ResourceNotFoundException;
+import com.contfiable.model.Article;
 import com.contfiable.model.Invoice;
 import com.contfiable.model.User;
 import com.contfiable.repository.ArticleRepository;
@@ -57,7 +58,24 @@ public class InvoiceService {
         invoice.setPdfUrl(request.getPdfUrl());
         invoice.setXmlUrl(request.getXmlUrl());
 
+        // Guardar la factura primero para obtener el ID
         Invoice savedInvoice = invoiceRepository.save(invoice);
+
+        // Crear los artículos asociados a la factura
+        if (request.getArticles() != null && !request.getArticles().isEmpty()) {
+            for (InvoiceCreateRequest.ArticleItem articleItem : request.getArticles()) {
+                Article article = new Article();
+                article.setInvoice(savedInvoice);
+                article.setName(articleItem.getName());
+                article.setDescription(articleItem.getDescription());
+                article.setQuantity(articleItem.getQuantity());
+                article.setPrice(articleItem.getPrice());
+                article.setTax(articleItem.getTax() != null ? articleItem.getTax() : java.math.BigDecimal.ZERO);
+                article.setImageUrl(articleItem.getImageUrl());
+                articleRepository.save(article);
+            }
+        }
+
         return mapToResponse(savedInvoice);
     }
 
