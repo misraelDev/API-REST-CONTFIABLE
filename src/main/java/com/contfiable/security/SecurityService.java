@@ -25,30 +25,49 @@ public class SecurityService {
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        if (authentication == null || !authentication.isAuthenticated()) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SecurityService.class);
+        
+        if (authentication == null) {
+            logger.error("Authentication es null");
+            throw new BadRequestException("No hay usuario autenticado");
+        }
+        
+        if (!authentication.isAuthenticated()) {
+            logger.error("Authentication no está autenticado. Principal: {}", authentication.getPrincipal());
             throw new BadRequestException("No hay usuario autenticado");
         }
 
         Object principal = authentication.getPrincipal();
+        logger.info("Principal type: {}, Principal: {}", principal.getClass().getName(), principal);
+        
         String identifier;
         
         if (principal instanceof UserDetails userDetails) {
             identifier = userDetails.getUsername();
+            logger.info("Identifier desde UserDetails: {}", identifier);
         } else if (principal instanceof String) {
             identifier = (String) principal;
+            logger.info("Identifier desde String: {}", identifier);
         } else {
+            logger.error("Principal no es UserDetails ni String. Type: {}", principal.getClass().getName());
             throw new BadRequestException("No se pudo obtener el identificador del usuario autenticado");
         }
 
         // Intentar primero como ID numérico, si falla intentar como email
         try {
             Long userId = Long.parseLong(identifier);
-            return userRepository.findById(userId)
-                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado"));
+            logger.info("Buscando usuario por ID: {}", userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado con ID: " + userId));
+            logger.info("Usuario encontrado: {}", user.getEmail());
+            return user;
         } catch (NumberFormatException e) {
             // Si no es un número, intentar buscar por email
-            return userRepository.findByEmail(identifier)
-                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado"));
+            logger.info("Identifier no es numérico, buscando por email: {}", identifier);
+            User user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new BadRequestException("Usuario autenticado no encontrado con email: " + identifier));
+            logger.info("Usuario encontrado por email: {}", user.getEmail());
+            return user;
         }
     }
 
