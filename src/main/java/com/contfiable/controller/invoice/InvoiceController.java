@@ -2,7 +2,7 @@ package com.contfiable.controller.invoice;
 
 import com.contfiable.dto.invoice.InvoiceCreateRequest;
 import com.contfiable.dto.invoice.InvoiceResponse;
-import com.contfiable.dto.invoice.InvoiceSummaryResponse;
+import com.contfiable.dto.invoice.InvoicesSummaryWrapper;
 import com.contfiable.dto.invoice.InvoiceUpdateRequest;
 import com.contfiable.service.invoice.InvoiceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,9 +49,9 @@ public class InvoiceController {
 
     // ⚠️ IMPORTANTE: /summary DEBE ir ANTES de /{invoiceId}
     @GetMapping("/summary")
-    public ResponseEntity<List<InvoiceSummaryResponse>> getInvoicesSummary() {
-        List<InvoiceSummaryResponse> responses = invoiceService.getInvoicesSummary();
-        return ResponseEntity.ok(responses);
+    public ResponseEntity<InvoicesSummaryWrapper> getInvoicesSummary() {
+        InvoicesSummaryWrapper response = invoiceService.getInvoicesSummary();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{invoiceId}")
