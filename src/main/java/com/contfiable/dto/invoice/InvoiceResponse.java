@@ -26,6 +26,7 @@ public class InvoiceResponse {
     private String notes;
     private String pdfUrl;
     private String xmlUrl;
+    private String imageUrl;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private List<ArticleResponse> articles;
@@ -49,6 +50,7 @@ public class InvoiceResponse {
         response.notes = invoice.getNotes();
         response.pdfUrl = invoice.getPdfUrl();
         response.xmlUrl = invoice.getXmlUrl();
+        response.imageUrl = invoice.getImageUrl();
         response.createdAt = invoice.getCreatedAt();
         response.updatedAt = invoice.getUpdatedAt();
         response.articles = articles != null ? List.copyOf(articles) : List.of();
@@ -121,6 +123,22 @@ public class InvoiceResponse {
 
     public String getXmlUrl() {
         return xmlUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setPdfUrl(String pdfUrl) {
+        this.pdfUrl = pdfUrl;
+    }
+
+    public void setXmlUrl(String xmlUrl) {
+        this.xmlUrl = xmlUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public OffsetDateTime getCreatedAt() {
