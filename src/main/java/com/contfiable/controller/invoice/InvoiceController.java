@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/v1/invoices")
 public class InvoiceController {
@@ -40,39 +41,25 @@ public class InvoiceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Obtiene todas las facturas del usuario autenticado.
-     * Requiere autenticación JWT en el header Authorization: Bearer {token}
-     * Solo devuelve facturas del usuario autenticado.
-     */
     @GetMapping
     public ResponseEntity<List<InvoiceResponse>> getInvoices() {
         List<InvoiceResponse> responses = invoiceService.getInvoices();
         return ResponseEntity.ok(responses);
     }
 
+    // ⚠️ IMPORTANTE: /summary DEBE ir ANTES de /{invoiceId}
     @GetMapping("/summary")
     public ResponseEntity<List<InvoiceSummaryResponse>> getInvoicesSummary() {
         List<InvoiceSummaryResponse> responses = invoiceService.getInvoicesSummary();
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Obtiene una factura por ID.
-     * Requiere autenticación JWT en el header Authorization: Bearer {token}
-     * Solo devuelve facturas del usuario autenticado.
-     */
     @GetMapping("/{invoiceId}")
     public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable Long invoiceId) {
         InvoiceResponse response = invoiceService.getInvoice(invoiceId);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Actualiza una factura por ID.
-     * Requiere autenticación JWT en el header Authorization: Bearer {token}
-     * Solo permite actualizar facturas del usuario autenticado.
-     */
     @PutMapping("/{invoiceId}")
     public ResponseEntity<InvoiceResponse> updateInvoice(
             @PathVariable Long invoiceId,
@@ -82,15 +69,9 @@ public class InvoiceController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Elimina una factura por ID.
-     * Requiere autenticación JWT en el header Authorization: Bearer {token}
-     * Solo permite eliminar facturas del usuario autenticado.
-     */
     @DeleteMapping("/{invoiceId}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long invoiceId) {
         invoiceService.deleteInvoice(invoiceId);
         return ResponseEntity.noContent().build();
     }
 }
-
