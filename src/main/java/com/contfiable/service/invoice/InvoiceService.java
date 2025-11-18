@@ -87,23 +87,26 @@ public class InvoiceService {
             int imageIndex = 0;
             for (InvoiceCreateRequest.ArticleItem articleItem : request.getArticles()) {
                 Article article = new Article();
-                article.setInvoice(savedInvoice);
                 article.setName(articleItem.getName());
                 article.setDescription(articleItem.getDescription());
                 article.setQuantity(articleItem.getQuantity());
                 article.setPrice(articleItem.getPrice());
                 article.setTax(articleItem.getTax() != null ? articleItem.getTax() : java.math.BigDecimal.ZERO);
                 
-            if (articleImages != null && imageIndex < articleImages.size()) {
-                MultipartFile artImageFile = articleImages.get(imageIndex);
-                if (artImageFile != null && !artImageFile.isEmpty()) {
-                    String artImageUrl = fileStorageService.storeFile(artImageFile, "articles/images");
-                    article.setImageUrl(artImageUrl);
+                if (articleImages != null && imageIndex < articleImages.size()) {
+                    MultipartFile artImageFile = articleImages.get(imageIndex);
+                    if (artImageFile != null && !artImageFile.isEmpty()) {
+                        String artImageUrl = fileStorageService.storeFile(artImageFile, "articles/images");
+                        article.setImageUrl(artImageUrl);
+                    }
+                    imageIndex++;
                 }
-                imageIndex++;
-            }                savedInvoice.addArticle(article);
+                
+                savedInvoice.addArticle(article);
             }
             
+            savedInvoice = invoiceRepository.saveAndFlush(savedInvoice);
+            savedInvoice.calculateTotals();
             savedInvoice = invoiceRepository.saveAndFlush(savedInvoice);
         }
 
