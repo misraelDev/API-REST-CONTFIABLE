@@ -1,0 +1,147 @@
+{
+    "info": {
+        "name": "API-REST-CONTFIABLE",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Facturas",
+            "description": "",
+            "item": [
+                {
+                    "name": "Crear Factura",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "eyJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdLCJzdWIiOiJhbmFAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjMwNzI4NDksImV4cCI6MTc2MzE1OTI0OX0.J8foBvQwjKAYwpRBQw7_ZpB9xVPqjYG_5f8F1HdYPlQ",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\n  \"customerName\": \"Misrael Florentino\",\n  \"status\": \"draft\",\n  \"currency\": \"MXN\",\n  \"paymentMethod\": \"transfer\",\n  \"uuidSat\": \"UUID-123\",\n  \"dueDate\": \"2025-01-15T00:00:00Z\",\n  \"notes\": \"Factura de prueba\",\n  \"articles\": [\n    {\n      \"name\": \"Producto 1\",\n      \"description\": \"Descripción del producto\",\n      \"quantity\": 2,\n      \"price\": 100.00,\n      \"tax\": 16.00\n    },\n    {\n      \"name\": \"Producto 2\",\n      \"quantity\": 1,\n      \"price\": 50.00,\n      \"tax\": 8.00\n    }\n  ]\n}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "pdfFile",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Archivo PDF de la factura (opcional)"
+                                },
+                                {
+                                    "key": "xmlFile",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Archivo XML de la factura (opcional)"
+                                },
+                                {
+                                    "key": "articleImages",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Imagen del artículo 1 (opcional)"
+                                },
+                                {
+                                    "key": "articleImages",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Imagen del artículo 2 (opcional)"
+                                }
+                            ]
+                        },
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/invoices",
+                            "path": [
+                                "api",
+                                "v1",
+                                "invoices"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Éxito",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json",
+                                        "description": "",
+                                        "disabled": false
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/invoices",
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "invoices"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"customerId\": 1,\n  \"status\": \"draft\",\n  \"currency\": \"MXN\",\n  \"paymentMethod\": \"transfer\",\n  \"uuidSat\": \"UUID-123\",\n  \"dueDate\": \"2025-01-15T00:00:00Z\",\n  \"notes\": \"Factura de prueba\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "cookie": []
+                        }
+                    ],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
+                }
+            ],
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [],
+                        "type": "text/javascript",
+                        "packages": {}
+                    }
+                }
+            ],
+            "auth": {}
+        }
+    ],
+    "variable": [],
+    "event": [],
+    "auth": {}
+}
