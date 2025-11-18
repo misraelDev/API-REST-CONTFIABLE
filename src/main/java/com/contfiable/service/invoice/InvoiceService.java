@@ -3,7 +3,8 @@ package com.contfiable.service.invoice;
 import com.contfiable.dto.article.ArticleResponse;
 import com.contfiable.dto.invoice.InvoiceCreateRequest;
 import com.contfiable.dto.invoice.InvoiceResponse;
-import com.contfiable.dto.invoice.InvoiceSummaryResponse;
+import com.contfiable.dto.invoice.InvoicesSummaryWrapper;
+import com.contfiable.dto.invoice.InvoiceSummaryItem;
 import com.contfiable.dto.invoice.InvoiceUpdateRequest;
 import com.contfiable.exception.ResourceNotFoundException;
 import com.contfiable.model.Article;
@@ -216,35 +217,39 @@ public class InvoiceService {
     }
 
     @Transactional(readOnly = true)
-    public List<InvoiceSummaryResponse> getInvoicesSummary() {
+    public InvoicesSummaryWrapper getInvoicesSummary() {
         Long userId = securityService.getCurrentUserId();
         List<Invoice> invoices = invoiceRepository.findByUserId(userId);
         
-        final BigDecimal sumaTotalIncome = invoices.stream()
+        BigDecimal sumaTotalIncome = invoices.stream()
                 .filter(invoice -> invoice.getType() == Invoice.Type.income && invoice.getTotal() != null)
                 .map(Invoice::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        final BigDecimal sumaTotalExpense = invoices.stream()
+        BigDecimal sumaTotalExpense = invoices.stream()
                 .filter(invoice -> invoice.getType() == Invoice.Type.expense && invoice.getTotal() != null)
                 .map(Invoice::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        final BigDecimal balance = sumaTotalIncome.subtract(sumaTotalExpense);
+        BigDecimal balance = sumaTotalIncome.subtract(sumaTotalExpense);
         
-        return invoices.stream().map(invoice -> {
-            InvoiceSummaryResponse summary = new InvoiceSummaryResponse(
-                invoice.getId(),
-                invoice.getCustomerName(),
-                invoice.getType().name(),
-                invoice.getTotal(),
-                invoice.getCreatedAt()
-            );
-            summary.setSumaTotalIncome(sumaTotalIncome);
-            summary.setSumaTotalExpense(sumaTotalExpense);
-            summary.setBalance(balance);
-            return summary;
-        }).toList();
+        InvoicesSummaryWrapper.GlobalSummary globalSummary = new InvoicesSummaryWrapper.GlobalSummary(
+            sumaTotalIncome,
+            sumaTotalExpense,
+            balance
+        );
+        
+        List<InvoiceSummaryItem> invoiceItems = invoices.stream()
+                .map(invoice -> new InvoiceSummaryItem(
+                    invoice.getId(),
+                    invoice.getCustomerName(),
+                    invoice.getType().name(),
+                    invoice.getTotal(),
+                    invoice.getCreatedAt()
+                ))
+                .toList();
+        
+        return new InvoicesSummaryWrapper(globalSummary, invoiceItems);
     }
 
     private InvoiceResponse mapToResponse(Invoice invoice) {
