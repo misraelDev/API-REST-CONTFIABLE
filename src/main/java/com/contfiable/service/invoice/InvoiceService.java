@@ -43,7 +43,7 @@ public class InvoiceService {
     }
 
     @Transactional
-    public InvoiceResponse createInvoice(InvoiceCreateRequest request, MultipartFile pdfFile, MultipartFile xmlFile, List<MultipartFile> articleImages) {
+    public InvoiceResponse createInvoice(InvoiceCreateRequest request, MultipartFile pdfFile, MultipartFile xmlFile, MultipartFile imageFile, List<MultipartFile> articleImages) {
         User currentUser = securityService.getCurrentUser();
 
         // Generar número de factura automáticamente
@@ -63,7 +63,7 @@ public class InvoiceService {
         invoice.setCancelReason(request.getCancelReason());
         invoice.setNotes(request.getNotes());
 
-        // Guardar archivos PDF y XML
+        // Guardar archivos PDF, XML e imagen
         if (pdfFile != null && !pdfFile.isEmpty()) {
             String pdfUrl = fileStorageService.storeFile(pdfFile, "invoices/pdf");
             invoice.setPdfUrl(pdfUrl);
@@ -71,6 +71,10 @@ public class InvoiceService {
         if (xmlFile != null && !xmlFile.isEmpty()) {
             String xmlUrl = fileStorageService.storeFile(xmlFile, "invoices/xml");
             invoice.setXmlUrl(xmlUrl);
+        }
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = fileStorageService.storeFile(imageFile, "invoices/images");
+            invoice.setImageUrl(imageUrl);
         }
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
@@ -86,16 +90,14 @@ public class InvoiceService {
                 article.setPrice(articleItem.getPrice());
                 article.setTax(articleItem.getTax() != null ? articleItem.getTax() : java.math.BigDecimal.ZERO);
                 
-                if (articleImages != null && imageIndex < articleImages.size()) {
-                    MultipartFile imageFile = articleImages.get(imageIndex);
-                    if (imageFile != null && !imageFile.isEmpty()) {
-                        String imageUrl = fileStorageService.storeFile(imageFile, "articles/images");
-                        article.setImageUrl(imageUrl);
-                    }
-                    imageIndex++;
+            if (articleImages != null && imageIndex < articleImages.size()) {
+                MultipartFile artImageFile = articleImages.get(imageIndex);
+                if (artImageFile != null && !artImageFile.isEmpty()) {
+                    String artImageUrl = fileStorageService.storeFile(artImageFile, "articles/images");
+                    article.setImageUrl(artImageUrl);
                 }
-                
-                savedInvoice.addArticle(article);
+                imageIndex++;
+            }                savedInvoice.addArticle(article);
             }
             
             savedInvoice = invoiceRepository.saveAndFlush(savedInvoice);
@@ -156,10 +158,22 @@ public class InvoiceService {
             invoice.setNotes(request.getNotes());
         }
         if (request.getPdfUrl() != null) {
+            if (invoice.getPdfUrl() != null) {
+                fileStorageService.deleteFile(invoice.getPdfUrl());
+            }
             invoice.setPdfUrl(request.getPdfUrl());
         }
         if (request.getXmlUrl() != null) {
+            if (invoice.getXmlUrl() != null) {
+                fileStorageService.deleteFile(invoice.getXmlUrl());
+            }
             invoice.setXmlUrl(request.getXmlUrl());
+        }
+        if (request.getImageUrl() != null) {
+            if (invoice.getImageUrl() != null) {
+                fileStorageService.deleteFile(invoice.getImageUrl());
+            }
+            invoice.setImageUrl(request.getImageUrl());
         }
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
@@ -171,6 +185,26 @@ public class InvoiceService {
         Long userId = securityService.getCurrentUserId();
         Invoice invoice = invoiceRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la factura con id %d".formatted(id)));
+        
+        // Eliminar archivos asociados
+        if (invoice.getPdfUrl() != null) {
+            fileStorageService.deleteFile(invoice.getPdfUrl());
+        }
+        if (invoice.getXmlUrl() != null) {
+            fileStorageService.deleteFile(invoice.getXmlUrl());
+        }
+        if (invoice.getImageUrl() != null) {
+            fileStorageService.deleteFile(invoice.getImageUrl());
+        }
+        
+        // Eliminar imágenes de artículos
+        List<Article> articles = articleRepository.findByInvoiceId(id);
+        for (Article article : articles) {
+            if (article.getImageUrl() != null) {
+                fileStorageService.deleteFile(article.getImageUrl());
+            }
+        }
+        
         invoiceRepository.delete(invoice);
     }
 

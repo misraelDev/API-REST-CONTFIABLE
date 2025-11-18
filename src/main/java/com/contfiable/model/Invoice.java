@@ -107,6 +107,10 @@ public class Invoice {
     @Size(max = 500, message = "La URL del XML no puede exceder 500 caracteres")
     private String xmlUrl;
 
+    @Column(name = "image_url", length = 500)
+    @Size(max = 500, message = "La URL de la imagen no puede exceder 500 caracteres")
+    private String imageUrl;
+
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();
 
@@ -270,6 +274,14 @@ public class Invoice {
 
     public void setXmlUrl(String xmlUrl) {
         this.xmlUrl = xmlUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<Article> getArticles() {

@@ -45,6 +45,9 @@ public class InvoiceCreateRequest {
     @Size(max = 500, message = "La URL del XML no puede exceder 500 caracteres")
     private String xmlUrl;
 
+    @Size(max = 500, message = "La URL de la imagen no puede exceder 500 caracteres")
+    private String imageUrl;
+
     @Valid
     private List<ArticleItem> articles = new ArrayList<>();
 
@@ -180,6 +183,14 @@ public class InvoiceCreateRequest {
 
     public void setXmlUrl(String xmlUrl) {
         this.xmlUrl = xmlUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<ArticleItem> getArticles() {

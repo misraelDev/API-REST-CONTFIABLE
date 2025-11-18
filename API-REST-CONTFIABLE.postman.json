@@ -47,6 +47,12 @@
                                     "description": "Archivo XML de la factura (opcional)"
                                 },
                                 {
+                                    "key": "imageFile",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Imagen principal de la factura (opcional)"
+                                },
+                                {
                                     "key": "articleImages",
                                     "type": "file",
                                     "src": [],
