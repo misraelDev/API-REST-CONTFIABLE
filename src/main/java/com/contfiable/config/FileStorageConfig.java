@@ -19,7 +19,10 @@ public class FileStorageConfig implements WebMvcConfigurer {
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         String uploadPathUri = uploadPath.toUri().toString();
         
-        registry.addResourceHandler("/invoices/**", "/articles/**")
-                .addResourceLocations(uploadPathUri);
+        registry.addResourceHandler("/invoices/**")
+                .addResourceLocations(uploadPathUri + "invoices/");
+        
+        registry.addResourceHandler("/articles/**")
+                .addResourceLocations(uploadPathUri + "articles/");
     }
 }
