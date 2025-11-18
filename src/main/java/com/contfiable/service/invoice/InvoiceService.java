@@ -11,6 +11,7 @@ import com.contfiable.model.User;
 import com.contfiable.repository.ArticleRepository;
 import com.contfiable.repository.InvoiceRepository;
 import com.contfiable.security.SecurityService;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,15 +25,18 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final ArticleRepository articleRepository;
     private final SecurityService securityService;
+    private final EntityManager entityManager;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
             ArticleRepository articleRepository,
-            SecurityService securityService
+            SecurityService securityService,
+            EntityManager entityManager
     ) {
         this.invoiceRepository = invoiceRepository;
         this.articleRepository = articleRepository;
         this.securityService = securityService;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -58,26 +62,30 @@ public class InvoiceService {
         invoice.setPdfUrl(request.getPdfUrl());
         invoice.setXmlUrl(request.getXmlUrl());
 
-        // Crear los artículos y agregarlos a la factura antes de guardar
+        // Guardar la factura primero para obtener el ID
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        
+        // Crear y guardar los artículos asociados a la factura
         if (request.getArticles() != null && !request.getArticles().isEmpty()) {
             for (InvoiceCreateRequest.ArticleItem articleItem : request.getArticles()) {
                 Article article = new Article();
+                article.setInvoice(savedInvoice);
                 article.setName(articleItem.getName());
                 article.setDescription(articleItem.getDescription());
                 article.setQuantity(articleItem.getQuantity());
                 article.setPrice(articleItem.getPrice());
                 article.setTax(articleItem.getTax() != null ? articleItem.getTax() : java.math.BigDecimal.ZERO);
                 article.setImageUrl(articleItem.getImageUrl());
-                // Usar addArticle para establecer la relación bidireccional
-                invoice.addArticle(article);
+                // Guardar el artículo explícitamente
+                articleRepository.save(article);
             }
+            // Forzar flush para asegurar que los artículos se persistan
+            articleRepository.flush();
+            // Recargar la factura desde la BD para tener los artículos en la lista
+            entityManager.refresh(savedInvoice);
+            // Guardar la factura de nuevo para que se ejecute @PreUpdate y recalcule los totales
+            savedInvoice = invoiceRepository.save(savedInvoice);
         }
-
-        // Guardar la factura (los artículos se guardarán por cascade)
-        Invoice savedInvoice = invoiceRepository.save(invoice);
-        
-        // Forzar el flush para asegurar que los artículos se guarden
-        invoiceRepository.flush();
 
         return mapToResponse(savedInvoice);
     }

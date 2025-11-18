@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		jwt = authHeader.substring(7);
+		logger.info("Procesando token JWT para: {}", request.getRequestURI());
 
 		try {
 			AuthResponse authResponse = tokenCacheService.getCachedAuthResponse(jwt);
@@ -56,38 +57,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				authResponse = authService.verifyUserToken(jwt);
 			}
 
-			if (authResponse != null && authResponse.getUserId() != null) {
-				String userId = authResponse.getUserId();
+			if (authResponse == null) {
+				logger.warn("Token inválido o expirado: authResponse es null");
+				filterChain.doFilter(request, response);
+				return;
+			}
 
-				if (SecurityContextHolder.getContext().getAuthentication() == null) {
-					String role = authResponse.getRole() != null && !authResponse.getRole().isBlank()
-							? authResponse.getRole().toLowerCase()
-							: "client";
+			if (authResponse.getUserId() == null) {
+				logger.warn("Token inválido: userId es null. Email: {}, Role: {}", 
+					authResponse.getEmail(), authResponse.getRole());
+				filterChain.doFilter(request, response);
+				return;
+			}
 
-					List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+			String userId = authResponse.getUserId();
+			logger.info("Token válido. UserId: {}, Email: {}", userId, authResponse.getEmail());
 
-					UserDetails userDetails = User.builder()
-							.username(userId)
-							.password("")
-							.authorities(authorities)
-							.accountExpired(false)
-							.accountLocked(false)
-							.credentialsExpired(false)
-							.disabled(false)
-							.build();
+			if (SecurityContextHolder.getContext().getAuthentication() == null) {
+				String role = authResponse.getRole() != null && !authResponse.getRole().isBlank()
+						? authResponse.getRole().toLowerCase()
+						: "client";
 
-					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-							userDetails,
-							null,
-							userDetails.getAuthorities()
-					);
+				List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
-					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-					SecurityContextHolder.getContext().setAuthentication(authToken);
-				}
+				UserDetails userDetails = User.builder()
+						.username(userId)
+						.password("")
+						.authorities(authorities)
+						.accountExpired(false)
+						.accountLocked(false)
+						.credentialsExpired(false)
+						.disabled(false)
+						.build();
+
+				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+						userDetails,
+						null,
+						userDetails.getAuthorities()
+				);
+
+				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContextHolder.getContext().setAuthentication(authToken);
+				logger.debug("Usuario autenticado: {}", userId);
 			}
 		} catch (Exception e) {
-			logger.error("Cannot set user authentication: {}", e.getMessage());
+			logger.error("Error al procesar token JWT: {}", e.getMessage(), e);
+			// No escribir en el response aquí, dejar que authenticationEntryPoint lo haga
+			filterChain.doFilter(request, response);
+			return;
 		}
 
 		filterChain.doFilter(request, response);

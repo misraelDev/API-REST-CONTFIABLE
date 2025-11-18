@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -61,8 +63,11 @@ public class UserService {
 				user.getPassword(),
 				List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name().toUpperCase()))
 		);
-
-		String accessToken = jwtService.generateToken(userDetails);
+		// Agregar userId como claim en el token
+		Map<String, Object> extraClaims = new HashMap<>();
+		extraClaims.put("userId", user.getId() != null ? String.valueOf(user.getId()) : null);
+		extraClaims.put("sub", user.getId() != null ? String.valueOf(user.getId()) : null);
+		String accessToken = jwtService.generateToken(extraClaims, userDetails);
 		long expiresIn = jwtService.getExpirationTime();
 		AuthResponse resp = new AuthResponse();
 		resp.setAccessToken(accessToken);
@@ -89,7 +94,11 @@ public class UserService {
 				user.getPassword(),
 				List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name().toUpperCase()))
 		);
-		String accessToken = jwtService.generateToken(userDetails);
+		// Agregar userId como claim en el token
+		Map<String, Object> extraClaims = new HashMap<>();
+		extraClaims.put("userId", user.getId() != null ? String.valueOf(user.getId()) : null);
+		extraClaims.put("sub", user.getId() != null ? String.valueOf(user.getId()) : null);
+		String accessToken = jwtService.generateToken(extraClaims, userDetails);
 		long expiresIn = jwtService.getExpirationTime();
 		AuthResponse resp = new AuthResponse();
 		resp.setAccessToken(accessToken);

@@ -93,12 +93,16 @@ public class JwtService {
 
 	private Key getSignInKey() {
 		String keyCandidate = (jwtSecret != null && !jwtSecret.isEmpty()) ? jwtSecret : supabaseJwtSecret;
+		org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtService.class);
 
 		if (keyCandidate == null || keyCandidate.isEmpty()) {
+			logger.warn("No se encontró clave JWT configurada. Generando clave aleatoria (los tokens no serán consistentes entre reinicios)");
 			byte[] keyBytes = new byte[32];
 			new java.security.SecureRandom().nextBytes(keyBytes);
 			return Keys.hmacShaKeyFor(keyBytes);
 		}
+		
+		logger.debug("Usando clave JWT configurada (longitud: {})", keyCandidate.length());
 
 		try {
 			byte[] keyBytes = java.util.Base64.getDecoder().decode(keyCandidate);
@@ -147,8 +151,30 @@ public class JwtService {
 
 	public String extractUserId(String token) {
 		try {
-			return extractClaim(stripBearer(token), claims -> claims.get("sub", String.class));
+			Claims claims = extractAllClaims(stripBearer(token));
+			org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtService.class);
+			
+			// Intentar obtener userId del claim "userId" primero
+			Object userIdClaim = claims.get("userId");
+			if (userIdClaim != null) {
+				logger.debug("UserId encontrado en claim 'userId': {}", userIdClaim);
+				return userIdClaim.toString();
+			}
+			// Si no existe, intentar obtener del claim "sub"
+			Object subClaim = claims.get("sub");
+			if (subClaim != null) {
+				logger.debug("UserId encontrado en claim 'sub': {}", subClaim);
+				return subClaim.toString();
+			}
+			// Si no existe, usar el subject (puede ser email o userId)
+			String subject = claims.getSubject();
+			logger.debug("UserId no encontrado en claims, usando subject: {}", subject);
+			logger.warn("Token no tiene claim 'userId' o 'sub'. Subject: {}. Claims disponibles: {}", 
+				subject, claims.keySet());
+			return subject;
 		} catch (Exception e) {
+			org.slf4j.LoggerFactory.getLogger(JwtService.class).error(
+				"Error al extraer userId del token: {}", e.getMessage(), e);
 			return null;
 		}
 	}
@@ -178,8 +204,29 @@ public class JwtService {
 
 	public boolean isTokenValid(String token) {
 		try {
-			return !isTokenExpired(token);
+			// Intentar parsear el token para verificar que es válido
+			Claims claims = extractAllClaims(stripBearer(token));
+			boolean expired = isTokenExpired(token);
+			org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtService.class);
+			
+			if (expired) {
+				logger.warn("Token expirado. Expiration: {}", claims.getExpiration());
+				return false;
+			}
+			
+			logger.debug("Token válido. Subject: {}, Expiration: {}", claims.getSubject(), claims.getExpiration());
+			return true;
+		} catch (io.jsonwebtoken.ExpiredJwtException e) {
+			org.slf4j.LoggerFactory.getLogger(JwtService.class).warn("Token expirado: {}", e.getMessage());
+			return false;
+		} catch (io.jsonwebtoken.security.SignatureException e) {
+			org.slf4j.LoggerFactory.getLogger(JwtService.class).error("Error de firma en token: {}", e.getMessage());
+			return false;
+		} catch (io.jsonwebtoken.MalformedJwtException e) {
+			org.slf4j.LoggerFactory.getLogger(JwtService.class).error("Token malformado: {}", e.getMessage());
+			return false;
 		} catch (Exception e) {
+			org.slf4j.LoggerFactory.getLogger(JwtService.class).error("Error al validar token: {}", e.getMessage(), e);
 			return false;
 		}
 	}
