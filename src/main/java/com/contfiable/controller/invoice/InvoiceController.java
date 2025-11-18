@@ -32,10 +32,11 @@ public class InvoiceController {
             @RequestPart("data") String dataJson,
             @RequestPart(value = "pdfFile", required = false) MultipartFile pdfFile,
             @RequestPart(value = "xmlFile", required = false) MultipartFile xmlFile,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestPart(value = "articleImages", required = false) List<MultipartFile> articleImages
     ) throws Exception {
         InvoiceCreateRequest request = objectMapper.readValue(dataJson, InvoiceCreateRequest.class);
-        InvoiceResponse response = invoiceService.createInvoice(request, pdfFile, xmlFile, articleImages);
+        InvoiceResponse response = invoiceService.createInvoice(request, pdfFile, xmlFile, imageFile, articleImages);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
