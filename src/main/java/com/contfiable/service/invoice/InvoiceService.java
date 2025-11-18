@@ -13,6 +13,7 @@ import com.contfiable.repository.ArticleRepository;
 import com.contfiable.repository.InvoiceRepository;
 import com.contfiable.security.SecurityService;
 import com.contfiable.service.storage.FileStorageService;
+import com.contfiable.service.storage.UrlBuilderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -29,17 +30,20 @@ public class InvoiceService {
     private final ArticleRepository articleRepository;
     private final SecurityService securityService;
     private final FileStorageService fileStorageService;
+    private final UrlBuilderService urlBuilderService;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
             ArticleRepository articleRepository,
             SecurityService securityService,
-            FileStorageService fileStorageService
+            FileStorageService fileStorageService,
+            UrlBuilderService urlBuilderService
     ) {
         this.invoiceRepository = invoiceRepository;
         this.articleRepository = articleRepository;
         this.securityService = securityService;
         this.fileStorageService = fileStorageService;
+        this.urlBuilderService = urlBuilderService;
     }
 
     @Transactional
@@ -246,9 +250,18 @@ public class InvoiceService {
         }
         List<ArticleResponse> articles = articleRepository.findByInvoiceId(invoice.getId())
                 .stream()
-                .map(ArticleResponse::fromEntity)
+                .map(article -> {
+                    ArticleResponse response = ArticleResponse.fromEntity(article);
+                    response.setImageUrl(urlBuilderService.buildAbsoluteUrl(article.getImageUrl()));
+                    return response;
+                })
                 .toList();
-        return InvoiceResponse.fromEntity(invoice, articles);
+        
+        InvoiceResponse response = InvoiceResponse.fromEntity(invoice, articles);
+        response.setPdfUrl(urlBuilderService.buildAbsoluteUrl(invoice.getPdfUrl()));
+        response.setXmlUrl(urlBuilderService.buildAbsoluteUrl(invoice.getXmlUrl()));
+        response.setImageUrl(urlBuilderService.buildAbsoluteUrl(invoice.getImageUrl()));
+        return response;
     }
 }
 

@@ -77,6 +77,10 @@ public class ArticleResponse {
         return imageUrl;
     }
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
