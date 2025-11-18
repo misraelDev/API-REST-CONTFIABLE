@@ -41,17 +41,6 @@ public class InvoiceController {
     }
 
     /**
-     * Obtiene una factura por ID.
-     * Requiere autenticación JWT en el header Authorization: Bearer {token}
-     * Solo devuelve facturas del usuario autenticado.
-     */
-    @GetMapping("/{invoiceId}")
-    public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable Long invoiceId) {
-        InvoiceResponse response = invoiceService.getInvoice(invoiceId);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
      * Obtiene todas las facturas del usuario autenticado.
      * Requiere autenticación JWT en el header Authorization: Bearer {token}
      * Solo devuelve facturas del usuario autenticado.
@@ -66,6 +55,17 @@ public class InvoiceController {
     public ResponseEntity<List<InvoiceSummaryResponse>> getInvoicesSummary() {
         List<InvoiceSummaryResponse> responses = invoiceService.getInvoicesSummary();
         return ResponseEntity.ok(responses);
+    }
+
+    /**
+     * Obtiene una factura por ID.
+     * Requiere autenticación JWT en el header Authorization: Bearer {token}
+     * Solo devuelve facturas del usuario autenticado.
+     */
+    @GetMapping("/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable Long invoiceId) {
+        InvoiceResponse response = invoiceService.getInvoice(invoiceId);
+        return ResponseEntity.ok(response);
     }
 
     /**
