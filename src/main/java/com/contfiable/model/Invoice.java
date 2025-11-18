@@ -295,6 +295,7 @@ public class Invoice {
     public void addArticle(Article article) {
         article.setInvoice(this);
         this.articles.add(article);
+        calculateTotals();
     }
 
     public void removeArticle(Article article) {
@@ -317,7 +318,7 @@ public class Invoice {
         calculateTotals();
     }
 
-    private void calculateTotals() {
+    public void calculateTotals() {
         java.math.BigDecimal sub = java.math.BigDecimal.ZERO;
         java.math.BigDecimal taxSum = java.math.BigDecimal.ZERO;
         if (this.articles != null) {
