@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "b7c8e9f0-1a2b-3c4d-5e6f-7g8h9i0j1k2l",
+		"name": "API REST Contfiable - Reports",
+		"description": "Endpoints de reportes para API REST Contfiable",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Income vs Expense Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/income-vs-expense?since=2025-01-01&until=2025-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports",
+								"income-vs-expense"
+							],
+							"query": [
+								{
+									"key": "since",
+									"value": "2025-01-01",
+									"description": "Fecha de inicio (formato: YYYY-MM-DD)"
+								},
+								{
+									"key": "until",
+									"value": "2025-12-31",
+									"description": "Fecha de fin (formato: YYYY-MM-DD)"
+								}
+							]
+						},
+						"description": "Obtiene el reporte de ingresos vs gastos en un rango de fechas"
+					},
+					"response": []
+				},
+				{
+					"name": "Cash Flow Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/cash-flow?since=2025-01-01&until=2025-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports",
+								"cash-flow"
+							],
+							"query": [
+								{
+									"key": "since",
+									"value": "2025-01-01",
+									"description": "Fecha de inicio (formato: YYYY-MM-DD)"
+								},
+								{
+									"key": "until",
+									"value": "2025-12-31",
+									"description": "Fecha de fin (formato: YYYY-MM-DD)"
+								}
+							]
+						},
+						"description": "Obtiene el reporte de flujo de caja con balance acumulado"
+					},
+					"response": []
+				},
+				{
+					"name": "Top Customers Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/top-customers?since=2025-01-01&until=2025-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports",
+								"top-customers"
+							],
+							"query": [
+								{
+									"key": "since",
+									"value": "2025-01-01",
+									"description": "Fecha de inicio (formato: YYYY-MM-DD)"
+								},
+								{
+									"key": "until",
+									"value": "2025-12-31",
+									"description": "Fecha de fin (formato: YYYY-MM-DD)"
+								}
+							]
+						},
+						"description": "Obtiene el reporte de clientes top por volumen de facturación"
+					},
+					"response": []
+				},
+				{
+					"name": "Top Articles Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/top-articles?since=2025-01-01&until=2025-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports",
+								"top-articles"
+							],
+							"query": [
+								{
+									"key": "since",
+									"value": "2025-01-01",
+									"description": "Fecha de inicio (formato: YYYY-MM-DD)"
+								},
+								{
+									"key": "until",
+									"value": "2025-12-31",
+									"description": "Fecha de fin (formato: YYYY-MM-DD)"
+								}
+							]
+						},
+						"description": "Obtiene el reporte de artículos más vendidos con ingresos generados"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
