@@ -76,6 +76,9 @@ public class SecurityConfig implements WebMvcConfigurer {
                         // Rutas públicas (registro y login)
                         .requestMatchers("/api/v1/users/register", "/api/v1/users/login", "/api/v1/users/refresh").permitAll()
                         
+                        // Rutas públicas para archivos estáticos
+                        .requestMatchers("/invoices/**", "/articles/**").permitAll()
+                        
                         // Todas las demás rutas requieren autenticación
                         .anyRequest().authenticated())
                 .userDetailsService(userDetailsService)
