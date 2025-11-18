@@ -9,10 +9,12 @@ import com.contfiable.dto.invoice.InvoiceUpdateRequest;
 import com.contfiable.exception.ResourceNotFoundException;
 import com.contfiable.model.Article;
 import com.contfiable.model.Invoice;
+import com.contfiable.model.Notification;
 import com.contfiable.model.User;
 import com.contfiable.repository.ArticleRepository;
 import com.contfiable.repository.InvoiceRepository;
 import com.contfiable.security.SecurityService;
+import com.contfiable.service.notification.NotificationService;
 import com.contfiable.service.storage.FileStorageService;
 import com.contfiable.service.storage.UrlBuilderService;
 import org.springframework.stereotype.Service;
@@ -32,19 +34,22 @@ public class InvoiceService {
     private final SecurityService securityService;
     private final FileStorageService fileStorageService;
     private final UrlBuilderService urlBuilderService;
+    private final NotificationService notificationService;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
             ArticleRepository articleRepository,
             SecurityService securityService,
             FileStorageService fileStorageService,
-            UrlBuilderService urlBuilderService
+            UrlBuilderService urlBuilderService,
+            NotificationService notificationService
     ) {
         this.invoiceRepository = invoiceRepository;
         this.articleRepository = articleRepository;
         this.securityService = securityService;
         this.fileStorageService = fileStorageService;
         this.urlBuilderService = urlBuilderService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -111,6 +116,13 @@ public class InvoiceService {
             savedInvoice = invoiceRepository.saveAndFlush(savedInvoice);
         }
 
+        notificationService.createInvoiceNotification(
+            savedInvoice.getId(),
+            Notification.Type.invoice_created,
+            "Nueva factura creada",
+            String.format("Se ha creado la factura #%d para %s", savedInvoice.getInvoiceNumber(), savedInvoice.getCustomerName())
+        );
+
         return mapToResponse(savedInvoice);
     }
 
@@ -142,7 +154,17 @@ public class InvoiceService {
             invoice.setType(request.getType());
         }
         if (request.getStatus() != null) {
+            Invoice.Status oldStatus = invoice.getStatus();
             invoice.setStatus(request.getStatus());
+            
+            if (oldStatus != Invoice.Status.paid && request.getStatus() == Invoice.Status.paid) {
+                notificationService.createInvoiceNotification(
+                    invoice.getId(),
+                    Notification.Type.invoice_paid,
+                    "Factura pagada",
+                    String.format("La factura #%d ha sido marcada como pagada", invoice.getInvoiceNumber())
+                );
+            }
         }
         if (StringUtils.hasText(request.getCurrency())) {
             invoice.setCurrency(request.getCurrency());
@@ -193,6 +215,13 @@ public class InvoiceService {
         Long userId = securityService.getCurrentUserId();
         Invoice invoice = invoiceRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la factura con id %d".formatted(id)));
+        
+        notificationService.createInvoiceNotification(
+            invoice.getId(),
+            Notification.Type.system_alert,
+            "Factura eliminada",
+            String.format("La factura #%d ha sido eliminada", invoice.getInvoiceNumber())
+        );
         
         // Eliminar archivos asociados
         if (invoice.getPdfUrl() != null) {
